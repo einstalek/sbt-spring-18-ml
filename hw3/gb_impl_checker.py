@@ -1,13 +1,14 @@
 # coding=utf-8
 
 from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score
 import numpy as np
 import os
-import sys
-import imp
+from gb_impl_arganaidi import SimpleGB
 import signal
 import pandas
 import traceback
+import matplotlib.pyplot as plt
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -23,6 +24,7 @@ class Checker(object):
         target = 'left'
         features = [c for c in df if c != target]
         self.target = np.array(df[target])
+        self.target = np.array([-1 if x == 0 else 1 for x in self.target])
         self.data = np.array(df[features])
         self.application = 0
 
@@ -31,14 +33,12 @@ class Checker(object):
             signal.signal(signal.SIGALRM, signal_handler)
             # Time limit на эту задачу 1 минута
             signal.alarm(60)
-            gb_impl = imp.load_source('gb_impl_{}'.format(self.application), script_path)
             self.application += 1
-            # Обучаться будет на 100 итерациях, чтобы одинаковый масштаб был
-            algo = gb_impl.SimpleGB(
-                tree_params_dict=gb_impl.TREE_PARAMS_DICT,
-                iters=100,
-                tau=gb_impl.TAU
-            )
+            algo = SimpleGB(
+                tree_params_dict={'max_depth': 2},
+                iters=50,
+                tau=0.05
+            ).fit(self.data, self.target)
             return np.mean(cross_val_score(algo, self.data, self.target, cv=3, scoring='accuracy'))
         except:
             traceback.print_exc()
