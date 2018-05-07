@@ -25,7 +25,6 @@ class SimpleGB(BaseEstimator):
         self.iters = iters
         self.tau = tau
         self.estimators = []
-        self.weights = []
         
     def fit(self, X_data, y_data):
         self.base_algo = DecisionTreeRegressor(**self.tree_params_dict, random_state=1)
@@ -37,17 +36,12 @@ class SimpleGB(BaseEstimator):
             algo = DecisionTreeRegressor(**self.tree_params_dict, random_state=1)
             algo.fit(X_data, resid)
             self.estimators.append(algo)
-
-            # weight_tuner = lambda x: loss_function(y_data, curr_pred + x * algo.predict(X_data))
-            # res, *_ = fmin_slsqp(weight_tuner, np.array([0.05,]), bounds=[(-1, 1)], iprint=0)
-
-            self.weights.append(res)
             curr_pred += self.tau * algo.predict(X_data)
         return self
     
     def predict(self, X_data):
         # Предсказание на данных
         res = self.base_algo.predict(X_data)
-        for estimator, weight in zip(self.estimators, self.weights):
+        for estimator in self.estimators:
             res += self.tau * estimator.predict(X_data)
         return np.array([1 if x else -1 for x in res > 0.])

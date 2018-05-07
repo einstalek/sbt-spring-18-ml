@@ -1,14 +1,12 @@
 # coding=utf-8
 
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score
 import numpy as np
 import os
 from gb_impl_arganaidi import SimpleGB
 import signal
 import pandas
 import traceback
-import matplotlib.pyplot as plt
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -36,8 +34,8 @@ class Checker(object):
             self.application += 1
             algo = SimpleGB(
                 tree_params_dict={'max_depth': 2},
-                iters=50,
-                tau=0.05
+                iters=100,
+                tau=0.6
             ).fit(self.data, self.target)
             return np.mean(cross_val_score(algo, self.data, self.target, cv=3, scoring='accuracy'))
         except:
