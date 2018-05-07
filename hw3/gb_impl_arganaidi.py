@@ -38,8 +38,8 @@ class SimpleGB(BaseEstimator):
             algo.fit(X_data, resid)
             self.estimators.append(algo)
 
-            weight_tuner = lambda x: loss_function(y_data, curr_pred + x * algo.predict(X_data))
-            res, *_ = fmin_slsqp(weight_tuner, np.array([0.05,]), bounds=[(-1, 1)], iprint=0)
+            # weight_tuner = lambda x: loss_function(y_data, curr_pred + x * algo.predict(X_data))
+            # res, *_ = fmin_slsqp(weight_tuner, np.array([0.05,]), bounds=[(-1, 1)], iprint=0)
 
             self.weights.append(res)
             curr_pred += self.tau * algo.predict(X_data)
